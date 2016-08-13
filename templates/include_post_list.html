@@ -1,0 +1,14 @@
+{% load page_control %}
+{% page_control posts %}
+    <br>
+    {% for post in posts %}
+        <a href="{% url 'post' post.url %}">{{ post.title }}</a>
+        <i>{{ post.when.date }}</i>
+        <ul class="inline_tags">
+        {% for tag in post.get_tags %}
+            <li><a href="{% url 'tag' tag %}">{{tag}}</a></li>
+        {% endfor %}</ul>
+        <br>
+    {% endfor %}
+        <br>
+{% page_control posts %}

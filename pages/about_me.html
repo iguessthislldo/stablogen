@@ -1,0 +1,46 @@
+{% extends "blog/page.html" %}
+{% load staticfiles %}
+{% load include_post %}
+{% block title %}About Me{% endblock %}
+{% block content %}
+<h2>About</h2>
+<p>My name is <b>Frederick Hornsey</b> and I'm currently a CS Undergrad.</p>
+<h3>Blog</h3>
+<p>Right now I'm hoping to post about the following in the future:</p>
+<ul>
+<li>Any software or framework i'm playing with (Ex: <a href="https://www.djangoproject.com/">Django</a> or
+<a href=https://www.mediawiki.org/wiki/MediaWiki>MediaWiki</a>)</li>
+<li>I thinking about focusing on Time/Calendar related programing for future work, so I might post about that I go about</li>
+<li>game development, specifically with <a href="http://www.sfml-dev.org/">SFML</a></li>
+<li>web development</li>
+<li>Linux: specifically Arch, Ubuntu, and Debian</li>
+<li>I want to play with FreeBSD or OpenBSD at some point.</li>
+<li><a href="https://www.python.org/">Python</a> (3 of course), which is the language I feel most comfortable with.</li>
+<li>C++, which I'm not sure I'll ever get used to but I still try</li>
+<li>Currently learning <a href="https://www.rust-lang.org/">Rust</a></li>
+<li>After Rust I would like to learn a functional language, almost certainly would be <a href="https://www.haskell.org/">Haskell</a>.</li>
+<li>Maybe somestuff from school if I feel especially proud of it or it's interesting</li>
+</ul>
+
+<p>This blog was built by from scratch (if you don't count <a href="https://www.djangoproject.com/">Django</a>) by me.
+The only other things here that I didn't make are <a href="https://disqus.com/">DISQUS</a> (the comments)  and
+the following fonts:
+Monofur by Tobias Benjamin Köhler (Offical page no longer available),
+<a href="https://fonts.google.com/specimen/Roboto">Roboto</a>,
+and <a href="http://fontawesome.io/"><span style="white-space: nowrap;">
+    <i class="fa fa-fa" aria-hidden="true">&nbsp;</i>Font Awesome</a>.</span>
+</p>
+<p>The reason I made it from scratch is to get familiar with Django again,
+although I'm not against migrating to a service like tumblr or ghost if this
+becomes a hassle in the future. Also It was (mostly) fun. The only things I
+would like to change about it if I have the time is some visual improvements
+and making it easier to post things, other wise I'm happy with it.</p>
+<h3>Contact</h3>
+<ul>
+    <li><i class="fa fa-envelope" aria-hidden="true"></i> Email: </i><a href="mailto:fred@hornsey.us">fred@hornsey.us</a></li>
+    <li><i class="fa fa-twitter" aria-hidden="true"></i> Twitter: </i><a href="https://twitter.com/iguessthislldo">@iguessthislldo</a></li>
+    <li><i class="fa fa-github" aria-hidden="true"></i> Github: <a href="https://github.com/iguessthislldo">github.com/iguessthislldo</a>
+        <b>(I don't have any code hosted there yet.)</b></li>
+</ul>
+{% endblock %}
+

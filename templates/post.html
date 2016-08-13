@@ -1,0 +1,8 @@
+{% extends "blog/page.html" %}
+{% block title %}{{ post.title }}{% endblock %}
+{% block content %}
+{% include_post post %}
+<br>
+{% include_comments post %}
+{% endblock %}
+

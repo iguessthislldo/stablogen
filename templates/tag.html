@@ -1,0 +1,10 @@
+{% extends "blog/page.html" %}{% load staticfiles include_post_list %}
+{% block title %}"{{ tag }}"{% endblock %}
+{% block content %}
+<h2>Posts tagged with: "{{tag}}"</h2>
+{% if posts %}
+{% include_post_list posts %}
+{% else %}
+    <b>No post has been tagged: "{{tag}}"</b>
+{% endif %}
+{% endblock %}

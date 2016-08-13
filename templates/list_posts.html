@@ -1,0 +1,13 @@
+{% extends "blog/page.html" %}
+{% load staticfiles %}
+{% load include_post_list %}
+{% block content %}
+<h2>Posts (by date posted)</h2>
+{% if posts %}
+    {% include_post_list posts %}
+{% else %}
+    <br>
+    <b>Nothing has been posted.</b>
+    <br>
+{% endif %}
+{% endblock %}
