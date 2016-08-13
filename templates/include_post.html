@@ -1,9 +1,10 @@
+{%- from 'include_comments.html' import include_comments_link -%}
 {% macro include_post(post) -%}
 <h2>{{ post.title }}</h2>
 <a href="/posts/{{ post.url }}" rel="bookmark"><i class="fa fa-link" aria-hidden="true"></i></a>
 <br>
 <i class="fa fa-comments" aria-hidden="true"></i>
-<a href="{#{{ include_comments_link post }}#}"></a>
+<a href="{{ include_comments_link(post) }}"></a>
 <i class="fa fa-clock-o" aria-hidden="true"></i>
 <i>{{ post.when.date }}</i>
 <i class="fa fa-tags" aria-hidden="true"></i>
@@ -14,5 +15,7 @@
 </ul>
 <br>
 <br>
-{{ post.content }}
+{%- autoescape false -%}
+{{- post.content -}}
+{%- endautoescape -%}
 {%- endmacro %}

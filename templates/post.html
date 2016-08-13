@@ -1,8 +1,10 @@
-{% extends "blog/page.html" %}
+{% extends "page.html" %}
+{%- from 'include_post.html' import include_post -%}
+{%- from 'include_comments.html' import include_comments -%}
 {% block title %}{{ post.title }}{% endblock %}
 {% block content %}
-{% include_post post %}
+{{ include_post(post) }}
 <br>
-{% include_comments post %}
+{{ include_comments(post) }}
 {% endblock %}
 

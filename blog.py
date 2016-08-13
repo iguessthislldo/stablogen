@@ -6,11 +6,12 @@ import os, sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.parse import quote
-import operator
+from shutil import rmtree
 
 # 3rd Party Libraries
 from jinja2 import Environment, FileSystemLoader
-import arrow import yaml
+import arrow
+import yaml
 
 # Paths
 blog_dir = Path(__file__).resolve().parent
@@ -169,12 +170,7 @@ class Tag:
 # Subcommands
 def generate():
     if output_dir.is_dir():
-        l = list(output_dir.rglob(''))
-        for i in reversed(l):
-            if i.is_file():
-                i.unlink()
-            else:
-                i.rmdir()
+        rmtree(str(output_dir))
     output_dir.mkdir()
 
     def guess_autoescape(template_name):
@@ -189,14 +185,19 @@ def generate():
         extensions = ['jinja2.ext.autoescape'],
         trim_blocks = True,
     )
+    env.globals.update(dict(
+        HOSTNAME = 'fred.hornsey.us',
+        DISQUS_NAME = 'iguessthislldo',
+    ))
 
-    with (output_dir / 'index.html').open('w') as f:
-        f.write(env.get_template('index.html').render(latest_posts=[]))
+    #with (output_dir / 'index.html').open('w') as f:
+    #    f.write(env.get_template('index.html').render(latest_posts=[]))
 
     Post.load_all()
     posts_output_dir = output_dir / 'posts'
-    for post in posts:
-        post_dir = posts_output_dir / post.url
+    posts_output_dir.mkdir()
+    for url, post in posts.items():
+        post_dir = posts_output_dir / url
         post_dir.mkdir()
         post_file = post_dir / 'index.html'
         with post_file.open('w') as f:
