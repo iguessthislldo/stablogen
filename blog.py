@@ -9,9 +9,13 @@ from urllib.parse import quote
 from shutil import rmtree
 
 # 3rd Party Libraries
-from jinja2 import Environment, FileSystemLoader
-import arrow
-import yaml
+try:
+    from jinja2 import Environment, FileSystemLoader
+    import arrow, yaml
+except ImportError:
+    sys.exit("One of the following is missing: jinja2, arrow, yaml\n" +
+        "Try running: pip install Jinja2 arrow PyYAML" +
+        "Also make sure you activated you virtual enviroment if your using one.")
 
 # Paths
 blog_dir = Path(__file__).resolve().parent
@@ -35,7 +39,10 @@ yaml.add_constructor('!arrow.Arrow', lambda loader, node:
 )
 
 # Utility Functions
-def editor(init_message=""):
+def editor(filepath):
+    os.system('%s %s' % (os.getenv('EDITOR', 'vi'), filepath))
+
+def temp_editor(init_message=""):
     '''
     Open temporary file in program defined by EDITOR enviromental
     variable (defaults to "vi"), once the program is done, return the file
@@ -46,7 +53,7 @@ def editor(init_message=""):
         with tmp_file.open('w') as f:
             f.write(init_message)
 
-        os.system('%s %s' % (os.getenv('EDITOR', 'vi'), str(tmp_file)))
+        editor(str(tmp_file))
 
         with tmp_file.open('r') as f:
             result = f.read()
@@ -68,6 +75,9 @@ def to_list(val: str):
 
 # Core code
 class Post(yaml.YAMLObject):
+    '''Core type of the program, represents a post in the blog.
+    '''
+
     def __init__(
         self, title, content, tags=[], url=None, when=None,
         last_edited = None
@@ -91,7 +101,8 @@ class Post(yaml.YAMLObject):
 
 
     def __str__(self):
-        return self.title + ' (' + self.url + '): ' + self.when.humanize()
+        rest = (" " + self.when.humanize()) if self.when is not None else ""
+        return self.title + ' (' + self.url + ')' + rest
 
     def __repr__(self):
         return '<' + self.__class__.__name__ + ': ' + str(self) + '>'
@@ -158,6 +169,14 @@ class Post(yaml.YAMLObject):
             yaml.dump(self, f)
         self.content = content # Restore content
 
+    @staticmethod
+    def get_finalized(final=True):
+        if final:
+            is_final = lambda p: p.when is not None
+        else:
+            is_final = lambda p: p.when is None
+        return filter(is_final, posts.values())
+
 class Tag:
     def __init__(self, name, posts=[]):
         self.name = name
@@ -169,6 +188,11 @@ class Tag:
 
 # Subcommands
 def generate():
+    '''Using everything, generates the blog from page, templates, static and
+    media files and the posts. Removes the output directory if it currently
+    exists.
+    '''
+
     if output_dir.is_dir():
         rmtree(str(output_dir))
     output_dir.mkdir()
@@ -205,19 +229,69 @@ def generate():
         
 
 def post():
-    title = input("What to call this post?")
-    tags = to_list(input("What to tag it? (Seperate tags with ',')"))
-    content = editor()
+    '''Create a post using the editor defined in the EDITOR enviromental
+    variable. Refuses to continue if the post url (Generated from the title)
+    conflicts with another post.'''
+    first_time = True
+    title=""
+    url=""
+    while first_time or (posts_dir/url).is_dir():
+        if not first_time:
+            print((
+            'That title results in the url: "{}", which already ' +
+            'exists, please choose another one.'
+            ).format(url))
+        title = input("What to call this post? ")
+        url = make_url(title)
+        first_time = False
+    tags = to_list(input("What to tag it? (Seperate tags with ',') "))
+    content = temp_editor()
     if content == "":
         sys.exit("Blank post content")
     Post(title, content, tags).save()
 
 def edit():
-    pass
+    '''Edits a post that already exists. If finalized (when is set) and
+    changed (for content: file acess and different contents), sets
+    last_edited at the end to current utc.
+    '''
+    Post.load_all()
+    choice = input("Are you editing a [f]inalized or [u]nfinilized Post? ")
+    finalized = choice in ('u', 'U')
+    choices = sorted(Post.get_finalized(finalized),
+        key=lambda p: p.when if finalized else p.title
+    )
+    n = 1
+    for post in choices:
+        print("{} : {}".format(n, str(post)))
+        n += 1
+    choice = input("Which number do you want to edit? (Default is 1) ")
+    try:
+        choice = int(choice) - 1
+    except:
+        choice = 0
+    post = choices[choice]
+    
+    final_text = 'final: true' if finalized else 'final: false'
+    post_data = [post.title, final_text] + post.tags
+    result = temp_editor('\n'.join(post_data))
+    results = result.split('\n')
+    post.title = results[0]
+    if yaml.load(results[1])['final']:
+        post.finalize()
+    post.tags = results[2:]
+
+    old_content = post.content
+    new_content = temp_editor(post.content)
+    if old_content != new_content:
+        if post.when is not None:
+            post.last_edited = arrow.utcnow()
+        post.content = new_content
+
+    post.save()
 
 def list_tags():
-    '''
-    Sort them by decreasing number of posts they have, then secondarily
+    '''Sort them by decreasing number of posts they have, then secondarily
     alphabetically by name.
     '''
     Post.load_all()
@@ -228,7 +302,8 @@ def list_tags():
 
 def list_posts():
     Post.load_all()
-    print(posts)
+    for post in sorted(posts.values(), key=lambda p: p.title):
+        print(post)
 
 if __name__ == '__main__':
     import argparse
