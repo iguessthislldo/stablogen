@@ -68,7 +68,7 @@ def if_none_else_do(val, func):
 
 def make_url(title, url = None):
     if url is None:
-        return quote(title.lower().replace(' ', '_'))
+        return title.lower().replace(' ', '_')
     else:
         return url
 
@@ -94,13 +94,15 @@ class Post(yaml.YAMLObject):
     def finalize(self):
         self.when = arrow.utcnow()
 
+    def edit(self):
+        self.last_edited = arrow.utcnow()
+
     def apply_tags(self):
         for tag in self.tags:
             if tag in all_tags.keys():
                 all_tags[tag].add_post(self)
             else:
                 all_tags[tag] = Tag(tag, [self])
-
 
     def __str__(self):
         rest = (" " + self.when.humanize()) if self.when is not None else ""
@@ -149,8 +151,6 @@ class Post(yaml.YAMLObject):
             posts[post.url] = post
 
     def save(self):
-        print('Saving Post: "' + self.title + '"...')
-
         if not posts_dir.is_dir():
             posts_dir.mkdir()
 
@@ -180,8 +180,9 @@ class Post(yaml.YAMLObject):
         return filter(is_final, posts.values())
 
     def date(self):
-        when = "" if self.when is None else self.when.format('YYYY-MM-DD')
-        last_edited = "" if self.last_edited is None else " edited: " + self.when.format('YYYY-MM-DD')
+        fmt = 'YYYY-MM-DD'
+        when = "" if self.when is None else self.when.format(fmt)
+        last_edited = "" if self.last_edited is None else " edited: " + self.when.format(fmt)
         return when + last_edited
 
 class Tag:
@@ -244,69 +245,37 @@ def generate():
         post_file = post_dir / 'index.html'
         with post_file.open('w') as f:
             f.write(env.get_template('post.html').render(post=post))
+
+    with (posts_output_dir / 'index.html').open('w') as f:
+        f.write(env.get_template('list_posts.html').render(
+            posts = sorted(filter(
+                lambda i: i.when is not None, posts.values()
+                ), key=lambda p: p.when)
+        ))
         
-
-def post():
-    '''Create a post using the editor defined in the EDITOR enviromental
-    variable. Refuses to continue if the post url (Generated from the title)
-    conflicts with another post.'''
-    first_time = True
-    title=""
-    url=""
-    while first_time or (posts_dir/url).is_dir():
-        if not first_time:
-            print((
-            'That title results in the url: "{}", which already ' +
-            'exists, please choose another one.'
-            ).format(url))
-        title = input("What to call this post? ")
-        url = make_url(title)
-        first_time = False
-    tags = to_list(input("What to tag it? (Seperate tags with ',') "))
-    content = temp_editor()
-    if content == "":
-        sys.exit("Blank post content")
-    Post(title, content, tags).save()
-
-def edit():
-    '''Edits a post that already exists. If finalized (when is set) and
-    changed (for content: file acess and different contents), sets
-    last_edited at the end to current utc.
+def new(title):
+    '''Creates a empty post with a title supplied
     '''
-    Post.load_all()
-    choice = input("Are you editing a [f]inalized or [u]nfinilized Post? ")
-    finalized = choice in ('u', 'U')
-    choices = sorted(Post.get_finalized(finalized),
-        key=lambda p: p.when if finalized else p.title
-    )
-    n = 1
-    for post in choices:
-        print("{} : {}".format(n, str(post)))
-        n += 1
-    choice = input("Which number do you want to edit? (Default is 1) ")
-    try:
-        choice = int(choice) - 1
-    except:
-        choice = 0
-    post = choices[choice]
-    
-    final_text = 'final: true' if finalized else 'final: false'
-    post_data = [post.title, final_text] + post.tags
-    result = temp_editor('\n'.join(post_data))
-    results = result.split('\n')
-    post.title = results[0]
-    if yaml.load(results[1])['final']:
-        post.finalize()
-    post.tags = results[2:]
+    url = make_url(title)
+    if (posts_dir / url).is_dir():
+        sys.exit("{} is already a post".format(url))
+    Post(title, "", url=url).save()
 
-    old_content = post.content
-    new_content = temp_editor(post.content)
-    if old_content != new_content:
-        if post.when is not None:
-            post.last_edited = arrow.utcnow()
-        post.content = new_content
+def finalized(url):
+    post_dir = posts_dir / url 
+    if not post_dir.is_dir():
+        sys.exit("Not a valid post")
+    p = Post.load(post_dir)
+    p.finalize()
+    p.save()
 
-    post.save()
+def edited(url):
+    post_dir = posts_dir / url 
+    if not post_dir.is_dir():
+        sys.exit("Not a valid post")
+    p = Post.load(post_dir)
+    p.edit()
+    p.save()
 
 def list_tags():
     '''Sort them by decreasing number of posts they have, then secondarily
@@ -326,27 +295,37 @@ def list_posts():
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        'what',
-        choices=[
-            'generate',
-            'post',
-            'edit',
-            'list-tags',
-            'list-posts',
-        ]
+    group = parser.add_mutually_exclusive_group(required = True)
+    group.add_argument('-g', '--generate', action='store_true')
+    group.add_argument('-n', '--new',
+        nargs = 1,
+        metavar = 'TITLE',
     )
+    group.add_argument('-f', '--finalized',
+        nargs = 1,
+        metavar = 'URL',
+    )
+    group.add_argument('-e', '--edited',
+        nargs = 1,
+        metavar = 'URL',
+    )
+    group.add_argument('-t', '--tags', action='store_true')
+    group.add_argument('-p', '--posts', action='store_true')
 
-    cmd = parser.parse_args().what
+    args = parser.parse_args()
 
-    if cmd == 'generate':
+    if args.generate:
         generate()
-    elif cmd == 'post':
-        post()
-    elif cmd == 'edit':
-        edit()
-    elif cmd == 'list-tags':
+    elif args.new:
+        new(args.new[0])
+    elif args.finalized:
+        finalized(args.finalized[0])
+    elif args.edited:
+        edited(args.edited[0])
+    elif args.tags:
         list_tags()
-    elif cmd == 'list-posts':
+    elif args.posts:
         list_posts()
+    else:
+        parser.print_help()
 

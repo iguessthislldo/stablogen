@@ -1,4 +1,4 @@
-- Generate makes templates from "pages" correctly, 
-also copies the skeleton directory to output, creates tag pages
--  Added robots.txt
-- Post time data gets displayed by a method
+- Changed command interface arguments, removed interactive aspect. Must manage
+files directly for the most part now.
+- Adding my first post, adding directory
+- Posts page

@@ -1,12 +1,11 @@
-{% extends "blog/page.html" %}
-{% load staticfiles %}
-{% load include_post_list %}
+{% extends "page.html" %}
+{% from 'include_post_list.html' import include_post_list %}
 {% block content %}
 <h2>Posts (by date posted)</h2>
+<br>
 {% if posts %}
-    {% include_post_list posts %}
+    {{ include_post_list(posts) }}
 {% else %}
-    <br>
     <b>Nothing has been posted.</b>
     <br>
 {% endif %}
