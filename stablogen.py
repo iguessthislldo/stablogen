@@ -4,7 +4,7 @@
 # Python Standard Library
 import os, sys
 from pathlib import Path
-from tempfile import TemporaryDirectory
+import itertools
 from urllib.parse import quote
 from shutil import rmtree, copytree, copyfile
 
@@ -16,6 +16,9 @@ except ImportError:
     sys.exit("One of the following is missing: jinja2, arrow, yaml\n" +
         "Try running: pip install Jinja2 arrow PyYAML" +
         "Also make sure you activated you virtual enviroment if your using one.")
+
+# Local
+from stablogen.util import if_none_else_do, make_url, to_list
 
 # Paths
 blog_dir = Path(__file__).resolve().parent
@@ -40,41 +43,6 @@ yaml.add_constructor('!arrow.Arrow', lambda loader, node:
     arrow.get(loader.construct_scalar(node))
 )
 
-# Utility Functions
-def editor(filepath):
-    os.system('%s %s' % (os.getenv('EDITOR', 'vi'), filepath))
-
-def temp_editor(init_message=""):
-    '''
-    Open temporary file in program defined by EDITOR enviromental
-    variable (defaults to "vi"), once the program is done, return the file
-    as a string.
-    '''
-    with TemporaryDirectory() as tmp_dir:
-        tmp_file = Path(tmp_dir) / 'post'
-        with tmp_file.open('w') as f:
-            f.write(init_message)
-
-        editor(str(tmp_file))
-
-        with tmp_file.open('r') as f:
-            result = f.read()
-
-    return result
-
-def if_none_else_do(val, func):
-    ''' Return None if value is none, else return func(val) '''
-    return None if val is None else func(val)
-
-def make_url(title, url = None):
-    if url is None:
-        return title.lower().replace(' ', '_')
-    else:
-        return url
-
-def to_list(val: str):
-    return list(map(str.strip, val.split(',')))
-
 # Core code
 class Post(yaml.YAMLObject):
     '''Core type of the program, represents a post in the blog.
@@ -82,7 +50,7 @@ class Post(yaml.YAMLObject):
 
     def __init__(
         self, title, content, tags=[], url=None, when=None,
-        last_edited = None
+        last_edited = None, created = None
     ):
         self.title = title
         self.url = make_url(title, url)
@@ -90,6 +58,10 @@ class Post(yaml.YAMLObject):
         self.tags = tags
         self.when = when
         self.last_edited = last_edited
+        self.created = created
+
+    def create(self):
+        self.create = arrow.utcnow()
 
     def finalize(self):
         self.when = arrow.utcnow()
@@ -259,7 +231,9 @@ def new(title):
     url = make_url(title)
     if (posts_dir / url).is_dir():
         sys.exit("{} is already a post".format(url))
-    Post(title, "", url=url).save()
+    p = Post(title, "", url=url)
+    p.create()
+    p.save()
 
 def finalized(url):
     post_dir = posts_dir / url 

@@ -1,4 +1,9 @@
-- Changed command interface arguments, removed interactive aspect. Must manage
-files directly for the most part now.
-- Adding my first post, adding directory
-- Posts page
+- Named project to "stablogen"
+- Renamed 'blog.py' to 'stablogen.py'
+- Created 'stablogen' package structure for code
+- Created pagation class "Page"
+- Added scratchpad.py to gitignore
+- Added unit test (for Page.py) and run_tests.py to run tests
+- Added "created" attibute to Post to order them by in the command line.
+- Move util functions in 'stablogen.py' and 'Page.py' to stablogen.util
+- Added text to README
