@@ -1,5 +1,4 @@
-- Coppied media and static files from django blog
-- Cropped "directions.jpeg" media file
-- Added some more source documentation
-- Improved list-posts command
-- Implemented edit command
+- Generate makes templates from "pages" correctly, 
+also copies the skeleton directory to output, creates tag pages
+-  Added robots.txt
+- Post time data gets displayed by a method

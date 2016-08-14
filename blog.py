@@ -6,11 +6,11 @@ import os, sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.parse import quote
-from shutil import rmtree
+from shutil import rmtree, copytree, copyfile
 
 # 3rd Party Libraries
 try:
-    from jinja2 import Environment, FileSystemLoader
+    from jinja2 import Environment, FileSystemLoader, ChoiceLoader
     import arrow, yaml
 except ImportError:
     sys.exit("One of the following is missing: jinja2, arrow, yaml\n" +
@@ -21,6 +21,8 @@ except ImportError:
 blog_dir = Path(__file__).resolve().parent
 templates_dir = blog_dir / 'templates'
 posts_dir = blog_dir / 'posts'
+skl_dir = blog_dir / 'skl'
+pages_dir = blog_dir / 'pages'
 post_filename = 'post.yaml'
 content_filename = 'content.html'
 output_dir = blog_dir / 'output'
@@ -177,6 +179,11 @@ class Post(yaml.YAMLObject):
             is_final = lambda p: p.when is None
         return filter(is_final, posts.values())
 
+    def date(self):
+        when = "" if self.when is None else self.when.format('YYYY-MM-DD')
+        last_edited = "" if self.last_edited is None else " edited: " + self.when.format('YYYY-MM-DD')
+        return when + last_edited
+
 class Tag:
     def __init__(self, name, posts=[]):
         self.name = name
@@ -192,10 +199,10 @@ def generate():
     media files and the posts. Removes the output directory if it currently
     exists.
     '''
-
+    # Remove output directory and copy skl directory
     if output_dir.is_dir():
         rmtree(str(output_dir))
-    output_dir.mkdir()
+    copytree(str(skl_dir), str(output_dir))
 
     def guess_autoescape(template_name):
         if template_name is None or '.' not in template_name:
@@ -205,17 +212,28 @@ def generate():
 
     env = Environment(
         autoescape = guess_autoescape,
-        loader = FileSystemLoader(str(templates_dir)),
+        loader = ChoiceLoader([
+            FileSystemLoader(str(pages_dir)),
+            FileSystemLoader(str(templates_dir)),
+        ]),
         extensions = ['jinja2.ext.autoescape'],
         trim_blocks = True,
     )
     env.globals.update(dict(
         HOSTNAME = 'fred.hornsey.us',
         DISQUS_NAME = 'iguessthislldo',
+        latest_posts = posts,
     ))
 
-    #with (output_dir / 'index.html').open('w') as f:
-    #    f.write(env.get_template('index.html').render(latest_posts=[]))
+    for page in pages_dir.glob('*.html'):
+        if page.name == 'index.html':
+            page_dir = output_dir
+        else:
+            page_dir = output_dir / page.stem
+            page_dir.mkdir()
+
+        with (page_dir / 'index.html').open('w') as f:
+            f.write(env.get_template(page.name).render())
 
     Post.load_all()
     posts_output_dir = output_dir / 'posts'
