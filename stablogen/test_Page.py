@@ -1,4 +1,4 @@
-from Page import Page
+from .Page import Page
 
 import unittest
 

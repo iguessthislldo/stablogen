@@ -1,6 +1,1 @@
-- Moved Post code to Post module, paths to config.py
-- Changed index.html to display just latest post (Need to fix comments, whitespace)
-- Created Primitive code tag in jinja
-- "tags" page and each tag has a page
-- Changed about_me to reflect using stablogen
-- Chaned Readme
+Fixed Tests by creating stablogen.tests module that imports all other tests and run_tests.py loads them from there.

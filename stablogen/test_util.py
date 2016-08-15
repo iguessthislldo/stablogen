@@ -1,6 +1,6 @@
 import unittest
 
-from util import is_empty
+from .util import is_empty
 
 class is_empty_Tests(unittest.TestCase):
     def test_with_infinate_generator(self):
