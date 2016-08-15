@@ -1,17 +1,18 @@
+{% macro page_control(base_url, page) -%}
 <div class="page_control">
     <span>
-    {% if items.has_previous %}
-        <a href="?page={{ posts.previous_page_number }}">
+    {% if page.has_prev() %}
+        <a href="{{ base_url }}/{{ page.prev() }}">
         <i class="fa fa-arrow-left" aria-hidden="true"></i>
         </a>
     {% else %}
         <i class="fa fa-arrow-left grey" aria-hidden="true"></i> 
     {% endif %}
 
-    page {{ items.number }}/{{ items.paginator.num_pages }}
+    {{ page.print() }}
 
-    {% if items.has_next %}
-        <a href="?page={{ posts.previous_page_number }}">
+    {% if page.has_next() %}
+        <a href="{{ base_url }}/{{ page.next() }}">
         <i class="fa fa-arrow-right" aria-hidden="true"></i>
         </a>
     {% else %}
@@ -19,3 +20,4 @@
     {% endif %}
     </span>
 </div>
+{%- endmacro %}

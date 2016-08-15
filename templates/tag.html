@@ -1,9 +1,11 @@
-{% extends "blog/page.html" %}{% load staticfiles include_post_list %}
-{% block title %}"{{ tag }}"{% endblock %}
+{% extends "page.html" %}
+{% from 'include_post_list.html' import include_post_list %}
+{% block title %}"{{ tag.name }}"{% endblock %}
 {% block content %}
-<h2>Posts tagged with: "{{tag}}"</h2>
-{% if posts %}
-{% include_post_list posts %}
+<h2>Posts tagged with: "{{tag.name}}"</h2>
+<br>
+{% if tag.posts %}
+{{ include_post_list(tag.posts) }}
 {% else %}
     <b>No post has been tagged: "{{tag}}"</b>
 {% endif %}

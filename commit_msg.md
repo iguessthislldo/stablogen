@@ -1,9 +1,6 @@
-- Named project to "stablogen"
-- Renamed 'blog.py' to 'stablogen.py'
-- Created 'stablogen' package structure for code
-- Created pagation class "Page"
-- Added scratchpad.py to gitignore
-- Added unit test (for Page.py) and run_tests.py to run tests
-- Added "created" attibute to Post to order them by in the command line.
-- Move util functions in 'stablogen.py' and 'Page.py' to stablogen.util
-- Added text to README
+- Moved Post code to Post module, paths to config.py
+- Changed index.html to display just latest post (Need to fix comments, whitespace)
+- Created Primitive code tag in jinja
+- "tags" page and each tag has a page
+- Changed about_me to reflect using stablogen
+- Chaned Readme

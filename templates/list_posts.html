@@ -3,8 +3,8 @@
 {% block content %}
 <h2>Posts (by date posted)</h2>
 <br>
-{% if posts %}
-    {{ include_post_list(posts) }}
+{% if latest_posts %}
+    {{ include_post_list(latest_posts) }}
 {% else %}
     <b>Nothing has been posted.</b>
     <br>

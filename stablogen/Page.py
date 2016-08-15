@@ -1,5 +1,5 @@
 import itertools
-from util import is_empty, has_method
+from .util import is_empty, has_method
 
 class Page:
     # TODO: Possibly seperate the 'user' call  of __init__
@@ -41,16 +41,22 @@ class Page:
             index = self.index
         return self.pages[index]
 
+    def next(self):
+        return self.index + 1
+
     def has_next(self):
         return self.index < (self.length - 1)
 
     def get_next(self):
         return self.__class__(None, None, context = dict(
             pages = self.pages,
-            index = self.index + 1,
+            index = self.next(),
             length = self.length,
             per_page = self.per_page,
         ))
+
+    def prev(self):
+        return self.index - 1
 
     def has_prev(self):
         return self.index > 0
@@ -58,7 +64,7 @@ class Page:
     def get_prev(self):
         return self.__class__(None, None, context = dict(
             pages = self.pages,
-            index = self.index - 1,
+            index = self.prev(),
             length = self.length,
             per_page = self.per_page,
         ))
@@ -95,4 +101,7 @@ class Page:
 
     def __repr__(self):
         return '<{}: {}>'.format(self.__class__.__name__, str(self))
+
+    def print(self):
+        return str(self)
 

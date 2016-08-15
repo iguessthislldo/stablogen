@@ -1,11 +1,11 @@
-{% extends "blog/page.html" %}{% load staticfiles %}
+{% extends "page.html" %}
 {% block content %}
 <h2>Tags (by number of posts)</h2>
 <br>
 {% if tags %}
     <ul class="inline_tags">
     {% for tag in tags %}
-        <li><a href="{% url 'tag' tag.name %}">{{ tag.name }}</a></li>
+        <li><a href="/tags/{{ tag.url }}">{{ tag.name }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

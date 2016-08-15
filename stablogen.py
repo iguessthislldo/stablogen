@@ -3,168 +3,17 @@
 
 # Python Standard Library
 import os, sys
-from pathlib import Path
 import itertools
 from urllib.parse import quote
 from shutil import rmtree, copytree, copyfile
 
 # 3rd Party Libraries
-try:
-    from jinja2 import Environment, FileSystemLoader, ChoiceLoader
-    import arrow, yaml
-except ImportError:
-    sys.exit("One of the following is missing: jinja2, arrow, yaml\n" +
-        "Try running: pip install Jinja2 arrow PyYAML" +
-        "Also make sure you activated you virtual enviroment if your using one.")
+from jinja2 import Environment, FileSystemLoader, ChoiceLoader
+# pip install Jinja2 arrow PyYAML
 
 # Local
-from stablogen.util import if_none_else_do, make_url, to_list
-
-# Paths
-blog_dir = Path(__file__).resolve().parent
-templates_dir = blog_dir / 'templates'
-posts_dir = blog_dir / 'posts'
-skl_dir = blog_dir / 'skl'
-pages_dir = blog_dir / 'pages'
-post_filename = 'post.yaml'
-content_filename = 'content.html'
-output_dir = blog_dir / 'output'
-
-# Holds post data when acting on everyingthing
-# (Listing things, generating, etc)
-posts = dict()
-all_tags = dict()
-
-# Support Arrow Objects in PyYAML (At least date time equilvalent)
-yaml.add_representer(arrow.Arrow, lambda dumper, data:
-    dumper.represent_scalar('!arrow.Arrow', str(data))
-)
-yaml.add_constructor('!arrow.Arrow', lambda loader, node:
-    arrow.get(loader.construct_scalar(node))
-)
-
-# Core code
-class Post(yaml.YAMLObject):
-    '''Core type of the program, represents a post in the blog.
-    '''
-
-    def __init__(
-        self, title, content, tags=[], url=None, when=None,
-        last_edited = None, created = None
-    ):
-        self.title = title
-        self.url = make_url(title, url)
-        self.content = content
-        self.tags = tags
-        self.when = when
-        self.last_edited = last_edited
-        self.created = created
-
-    def create(self):
-        self.create = arrow.utcnow()
-
-    def finalize(self):
-        self.when = arrow.utcnow()
-
-    def edit(self):
-        self.last_edited = arrow.utcnow()
-
-    def apply_tags(self):
-        for tag in self.tags:
-            if tag in all_tags.keys():
-                all_tags[tag].add_post(self)
-            else:
-                all_tags[tag] = Tag(tag, [self])
-
-    def __str__(self):
-        rest = (" " + self.when.humanize()) if self.when is not None else ""
-        return self.title + ' (' + self.url + ')' + rest
-
-    def __repr__(self):
-        return '<' + self.__class__.__name__ + ': ' + str(self) + '>'
-
-    # YAML type
-    yaml_tag = '!blog.Post'
-
-    @staticmethod
-    def load(post_dir):
-        if not post_dir.is_dir():
-            return None
-        post_file = post_dir / post_filename
-        if not post_file.is_file():
-            print(str(posts_dir) + ' doesn\'t have a "' + post_filename + '"')
-            return None
-        content_file = post_dir / content_filename
-        if not content_file.is_file():
-            print(str(posts_dir) + ' doesn\'t have a "' + content_filename + '"')
-            return None
-
-        # Get Post Meta data
-        with post_file.open('r') as f:
-            post = yaml.load(f)
-
-        # Get Post Content
-        with content_file.open('r') as f:
-            post.content = f.read()
-
-        if post.url != post_dir.name:
-            print('WARNING: "' + post.url + '" does not match its directory name!')
-
-        post.apply_tags()
-
-        return post
-
-    @classmethod
-    def load_all(cls):
-        for post_dir in posts_dir.glob('*'):
-            post = cls.load(post_dir)
-            if post is None:
-                continue
-            posts[post.url] = post
-
-    def save(self):
-        if not posts_dir.is_dir():
-            posts_dir.mkdir()
-
-        post_dir = posts_dir / self.url
-        if not post_dir.is_dir():
-            post_dir.mkdir()
-
-        # Save Post Content
-        content_file = post_dir / content_filename
-        with content_file.open('w') as f:
-            f.write(self.content)
-
-        # Save Post Meta data
-        content = self.content # Don't include content
-        self.content = None
-        post_file = post_dir / post_filename
-        with post_file.open('w') as f:
-            yaml.dump(self, f)
-        self.content = content # Restore content
-
-    @staticmethod
-    def get_finalized(final=True):
-        if final:
-            is_final = lambda p: p.when is not None
-        else:
-            is_final = lambda p: p.when is None
-        return filter(is_final, posts.values())
-
-    def date(self):
-        fmt = 'YYYY-MM-DD'
-        when = "" if self.when is None else self.when.format(fmt)
-        last_edited = "" if self.last_edited is None else " edited: " + self.when.format(fmt)
-        return when + last_edited
-
-class Tag:
-    def __init__(self, name, posts=[]):
-        self.name = name
-        self.posts = posts
-
-    def add_post(self, post):
-        if post not in self.posts:
-            self.posts.append(post)
+from stablogen.config import *
+from stablogen.Post import *
 
 # Subcommands
 def generate():
@@ -172,6 +21,8 @@ def generate():
     media files and the posts. Removes the output directory if it currently
     exists.
     '''
+    Post.load_all()
+
     # Remove output directory and copy skl directory
     if output_dir.is_dir():
         rmtree(str(output_dir))
@@ -192,10 +43,13 @@ def generate():
         extensions = ['jinja2.ext.autoescape'],
         trim_blocks = True,
     )
+
+    latest_posts = Post.get_finalized()
     env.globals.update(dict(
         HOSTNAME = 'fred.hornsey.us',
         DISQUS_NAME = 'iguessthislldo',
-        latest_posts = posts,
+        latest_posts = latest_posts,
+        latest_post = latest_posts[0] if len(latest_posts) > 0 else None,
     ))
 
     for page in pages_dir.glob('*.html'):
@@ -208,10 +62,10 @@ def generate():
         with (page_dir / 'index.html').open('w') as f:
             f.write(env.get_template(page.name).render())
 
-    Post.load_all()
     posts_output_dir = output_dir / 'posts'
     posts_output_dir.mkdir()
-    for url, post in posts.items():
+
+    for url, post in Post.inventory.items():
         post_dir = posts_output_dir / url
         post_dir.mkdir()
         post_file = post_dir / 'index.html'
@@ -219,12 +73,23 @@ def generate():
             f.write(env.get_template('post.html').render(post=post))
 
     with (posts_output_dir / 'index.html').open('w') as f:
-        f.write(env.get_template('list_posts.html').render(
-            posts = sorted(filter(
-                lambda i: i.when is not None, posts.values()
-                ), key=lambda p: p.when)
-        ))
+        f.write(env.get_template('list_posts.html').render())
+
+    tags_output_dir = output_dir / 'tags'
+    tags_output_dir.mkdir()
+
+    for tag in Tag.inventory.values():
+        tag_dir = tags_output_dir / tag.url
+        tag_dir.mkdir()
+        tag_file = tag_dir / 'index.html'
+        with tag_file.open('w') as f:
+            f.write(env.get_template('tag.html').render(tag=tag))
         
+    with (tags_output_dir / 'index.html').open('w') as f:
+        f.write(env.get_template('list_tags.html').render(
+            tags=Tag.get_most_tagged()
+        ))
+
 def new(title):
     '''Creates a empty post with a title supplied
     '''
@@ -256,7 +121,7 @@ def list_tags():
     alphabetically by name.
     '''
     Post.load_all()
-    for tag in sorted(all_tags.values(),
+    for tag in sorted(Tag.inventory.values(),
         key = lambda tag: (-len(tag.posts), tag.name)
     ):
         print(tag.name, len(tag.posts))

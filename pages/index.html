@@ -2,13 +2,11 @@
 {%- from 'include_post.html' import include_post -%}
 {% block title %}iguesthislldo{% endblock %}
 {% block content %}
-{% if latest_posts %}
-{% for post in latest_posts %}
-{{ include_post(post) }}
+{% if latest_post %}
+{{ include_post(latest_post) }}
 <br>
 To view this post's comments or to comment, click here: <a href="{#{% macro include_comments_link post %}#}">Comment on this</a>
 <br>
-{% endfor %}
 {% else %}
 <b>Nothing has been posted yet.</b>
 {% endif %}
