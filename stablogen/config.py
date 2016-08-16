@@ -1,12 +1,15 @@
 from pathlib import Path
 
 # Paths
-blog_dir = Path('.').resolve()
-templates_dir = blog_dir / 'templates'
-posts_dir = blog_dir / 'posts'
-skl_dir = blog_dir / 'skl'
-pages_dir = blog_dir / 'pages'
+default_input_dirname = 'input'
+default_output_dirname = 'output'
+
+config_filename = 'stablogen.yaml'
+templates_dirname = 'templates'
+posts_dirname = 'posts'
+tags_dirname = 'tags'
 post_filename = 'post.yaml'
 content_filename = 'content.html'
-output_dir = blog_dir / 'output'
 
+# Use Jinja on the following file extentions in the input directory
+RENDER_EXTENTIONS = ['.html']

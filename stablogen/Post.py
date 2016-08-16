@@ -31,7 +31,7 @@ class Post(yaml.YAMLObject):
         self.created = created
 
     def create(self):
-        self.create = arrow.utcnow()
+        self.created = arrow.utcnow()
 
     def finalize(self):
         self.when = arrow.utcnow()
@@ -85,22 +85,18 @@ class Post(yaml.YAMLObject):
         return post
 
     @classmethod
-    def load_all(cls):
+    def load_all(cls, input_dir):
         if not cls.loaded:
-            for post_dir in posts_dir.glob('*'):
+            for post_dir in (input_dir/posts_dirname).glob('*'):
                 post = cls.load(post_dir)
                 if post is None:
                     continue
                 Post.inventory[post.url] = post
             cls.loaded = True
 
-    def save(self):
-        if not posts_dir.is_dir():
-            posts_dir.mkdir()
-
-        post_dir = posts_dir / self.url
+    def save(self, post_dir):
         if not post_dir.is_dir():
-            post_dir.mkdir()
+            post_dir.mkdir(parents=True, exist_ok=True)
 
         # Save Post Content
         content_file = post_dir / content_filename
@@ -116,8 +112,8 @@ class Post(yaml.YAMLObject):
         self.content = content # Restore content
 
     @classmethod
-    def get_finalized(cls, final=True):
-        cls.load_all()
+    def get_finalized(cls, input_dir, final=True):
+        cls.load_all(input_dir)
         if final:
             is_final = lambda p: p.when is not None
         else:
@@ -145,8 +141,8 @@ class Tag:
             self.posts.append(post)
 
     @classmethod
-    def get_most_tagged(cls):
-        Post.load_all()
+    def get_most_tagged(cls, input_dir):
+        Post.load_all(input_dir)
         return sorted(
             cls.inventory.values(),
             key = lambda t: len(t.posts),
