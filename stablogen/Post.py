@@ -4,10 +4,11 @@ from stablogen.config import *
 from stablogen.util import make_url
 
 # Support Arrow Objects in PyYAML (At least date time equilvalent)
+arrow_tag='!arrow.Arrow'
 yaml.add_representer(arrow.Arrow, lambda dumper, data:
-    dumper.represent_scalar('!arrow.Arrow', str(data))
+    dumper.represent_scalar(arrow_tag, str(data))
 )
-yaml.add_constructor('!arrow.Arrow', lambda loader, node:
+yaml.add_constructor(arrow_tag, lambda loader, node:
     arrow.get(loader.construct_scalar(node))
 )
 

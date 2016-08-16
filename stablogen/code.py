@@ -1,6 +1,10 @@
 from jinja2 import nodes
 from jinja2.ext import Extension
 
+from pygments import highlight
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters import HtmlFormatter
+
 def parse_expr_if(parser):
     if parser.stream.skip_if('comma'):
         return parser.parse_expression()
@@ -16,7 +20,8 @@ class CodeExtension(Extension):
         )
 
     def parse(self, parser):
-        lineno = next(parser.stream).lineno
+        lineno = next(parser.stream).lineno # I honestly dont really know
+                                            # what this does
 
         if parser.stream.current.test('string'): # Is there a string argument?
             args = [
@@ -36,14 +41,19 @@ class CodeExtension(Extension):
 
         body = parser.parse_statements(['name:endcode'], drop_needle=True)
 
-        return nodes.CallBlock(self.call_method('_code_call', args), [], [], body).set_lineno(lineno)
+        return nodes.CallBlock(
+            self.call_method('_code_call', args),
+            [], [], body
+        ).set_lineno(lineno)
 
     def _code_call(self, *args, **kw):
         language = args[0]
         filename = args[1]
         code = kw['caller']()
 
-        result = '<pre>' + code + '</pre>'
+        lexer = get_lexer_by_name(language, stripall=True)
+        formatter = HtmlFormatter(linenos=True)
+        result = filename + ':' + highlight(code, lexer, formatter)
 
         return result
 
@@ -51,21 +61,26 @@ from jinja2 import Environment, DictLoader
 env = Environment(
 loader = DictLoader(
 {'index.html': 
-'''This is the first line
+'''
 {% code "python", "file.py" -%}
-This is the code!
+#!/usr/bin/env python3
+from sys import exit, argv
+
+def do_something(*args, **kw):
+    print("This is the program doing something")
+
+if __name__ == "__main__":
+    if len(argv) > 4:
+        exit("Too many arguments")
+    do_something()
 {%- endcode %}
 '''}),
 extensions=[CodeExtension]
 )
 
-import pdb, traceback, sys
-
-try:
-    result = env.get_template('index.html').render()
-    print('RESULT')
-    print(result)
-except:
-    type, value, tb = sys.exc_info()
-    traceback.print_exc()
-    pdb.post_mortem(tb)
+result = env.get_template('index.html').render()
+print("<!DOCTYPE html>\n<html>\n<head>\n<style>")
+print(HtmlFormatter().get_style_defs('.highlight'))
+print("</style>\n</head>\n<body>")
+print(result)
+print("</body>\n</html>")
