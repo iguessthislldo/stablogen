@@ -4,6 +4,42 @@ from jinja2.ext import Extension
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name
 from pygments.formatters import HtmlFormatter
+from pygments.style import Style
+from pygments.token import Keyword, Name, Comment, String, Error, \
+     Number, Operator, Generic
+
+class CodeStyle(Style):
+    default_style = ""
+    styles = {
+        Comment:                'italic #7CAFC2',
+        Keyword:                'bold #DC9656',
+        Name:                   '#BA8BAF',
+        Name.Function:          '#F7CA88',
+        Name.Class:             '#A16946',
+        String:                 '#AB4642'
+    }
+
+formatter = HtmlFormatter(
+    style = CodeStyle,
+    nobackground = True,
+)
+
+def code_highlight(language, filename, code):
+    lexer = get_lexer_by_name(language, stripall=True)
+    return (
+        '<div class="codebox">{0}'
+        '<button class="code-copy-btn">'
+        '<i class="fa fa-clipboard" aria-hidden="true"></i>'
+        '</button><hr><div class="code-copy">{1}</div></div>'
+    ).format(
+        filename,
+        highlight(code, lexer, formatter),
+        code,
+    )
+
+def output_code_style(path):
+    path.write_text(formatter.get_style_defs('.highlight'))
+
 
 def parse_expr_if(parser):
     if parser.stream.skip_if('comma'):
@@ -22,7 +58,6 @@ class CodeExtension(Extension):
     def parse(self, parser):
         lineno = next(parser.stream).lineno # I honestly dont really know
                                             # what this does
-
         if parser.stream.current.test('string'): # Is there a string argument?
             args = [
                 parser.parse_expression(), # Get First Argument (No Comma)
@@ -42,45 +77,10 @@ class CodeExtension(Extension):
         body = parser.parse_statements(['name:endcode'], drop_needle=True)
 
         return nodes.CallBlock(
-            self.call_method('_code_call', args),
+            self.call_method('_code_highlight_call', args),
             [], [], body
         ).set_lineno(lineno)
 
-    def _code_call(self, *args, **kw):
-        language = args[0]
-        filename = args[1]
-        code = kw['caller']()
+    def _code_highlight_call(self, *args, **kw):
+        return code_highlight(args[0], args[1], kw['caller']())
 
-        lexer = get_lexer_by_name(language, stripall=True)
-        formatter = HtmlFormatter(linenos=True)
-        result = filename + ':' + highlight(code, lexer, formatter)
-
-        return result
-
-from jinja2 import Environment, DictLoader
-env = Environment(
-loader = DictLoader(
-{'index.html': 
-'''
-{% code "python", "file.py" -%}
-#!/usr/bin/env python3
-from sys import exit, argv
-
-def do_something(*args, **kw):
-    print("This is the program doing something")
-
-if __name__ == "__main__":
-    if len(argv) > 4:
-        exit("Too many arguments")
-    do_something()
-{%- endcode %}
-'''}),
-extensions=[CodeExtension]
-)
-
-result = env.get_template('index.html').render()
-print("<!DOCTYPE html>\n<html>\n<head>\n<style>")
-print(HtmlFormatter().get_style_defs('.highlight'))
-print("</style>\n</head>\n<body>")
-print(result)
-print("</body>\n</html>")

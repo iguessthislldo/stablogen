@@ -17,6 +17,9 @@
 
 </script>-->
 <link rel="stylesheet" type="text/css" href="/static/style.css" />
+<link rel="stylesheet" type="text/css" href="/static/code.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.12/clipboard.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 {% block extra_css %}{% endblock %}</head>
 <body>
 <header>
@@ -30,5 +33,12 @@
 <hr>
 <footer>&copy; Copyright 2016 Frederick Hornsey &lt;<a href="mailto:fred@hornsey.us">fred@hornsey.us</a>&gt;</footer>
 <script id="dsq-count-scr" src="//iguessthislldo.disqus.com/count.js" async></script>
+<script>
+new Clipboard('.code-copy-btn', {
+    text: function(trigger) {
+        return $(trigger.nextElementSibling.nextElementSibling).text();
+    }
+});
+</script>
 </body>
 </html>

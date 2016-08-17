@@ -71,19 +71,27 @@ img {
     font-style: normal;
 }
 
-pre {
+div.codebox {
     max-width: 90%;
     overflow: auto;
     background-color: #282828;
     box-shadow: 2px 2px 15px #999;
-    padding: 10px;
-    margin-left: 5%;
     border-radius: 5px;
-}
-
-code {
     font-family: 'monofur_for_powerline_correRg', 'monospace';
     color: #08f808;
+    margin-left: 5%;
+    padding: 10px;
+}
+
+div.codebox hr {
+    border: 0;
+    border-bottom: 2px dashed #08f808;
+    /*background: #999;*/
+}
+
+button.code-copy-btn {
+    border: none;
+    float: right;
 }
 
 code.inline {

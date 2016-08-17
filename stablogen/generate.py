@@ -8,6 +8,7 @@ from jinja2 import Environment, PackageLoader, FileSystemLoader, ChoiceLoader
 # Local
 from stablogen.config import *
 from stablogen.Post import *
+from stablogen.code import CodeExtension, output_code_style
 
 def setup_jinja(input_dir):
     def guess_autoescape(template_name):
@@ -17,12 +18,15 @@ def setup_jinja(input_dir):
         return ext in ('html', 'htm', 'xml')
 
     env = Environment(
-        autoescape = guess_autoescape,
+        autoescape = False,
         loader = ChoiceLoader([
             FileSystemLoader(str(input_dir)), # Prefer input templates? (Hopefully)
             PackageLoader('stablogen'),
         ]),
-        extensions = ['jinja2.ext.autoescape'],
+        extensions = [
+            'jinja2.ext.autoescape',
+            CodeExtension,
+        ],
         trim_blocks = True,
     )
 
@@ -98,6 +102,10 @@ def generate(input_dir, output_dir):
 
     env = setup_jinja(input_dir)
 
+    # Render Post content
+    for post in Post.inventory.values():
+        post.content = env.from_string(post.content).render()
+
     # Render Regular Pages
     for i in process_html:
         if i.name == 'index.html':
@@ -108,7 +116,7 @@ def generate(input_dir, output_dir):
         page_dir.mkdir(parents = True, exist_ok = True)
         (page_dir / 'index.html').write_text(env.get_template(str(i)).render())
 
-    # Render Posts
+    # Render Actual Post Pages
     posts_output_dir = output_dir / posts_dirname
     posts_output_dir.mkdir()
 
@@ -139,4 +147,7 @@ def generate(input_dir, output_dir):
         f.write(env.get_template('list_tags.html').render(
             tags=Tag.get_most_tagged(input_dir)
         ))
+
+    # Codehighlighting css
+    output_code_style(output_dir / PYGMENTS_CSS_OUTPUT)
 

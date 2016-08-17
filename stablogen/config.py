@@ -13,3 +13,4 @@ content_filename = 'content.html'
 
 # Use Jinja on the following file extentions in the input directory
 RENDER_EXTENTIONS = ['.html']
+PYGMENTS_CSS_OUTPUT = 'static/code.css'
