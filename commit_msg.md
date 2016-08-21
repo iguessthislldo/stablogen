@@ -1,8 +1,4 @@
-Actually working code tag.
+Added to README, Stole post format from https://github.com/alexex/blogen, now single file
 
-- Post content is now rendered before the pages.
-- Changed post to use code tag, commented out icode tag because they 
-are not working.
-- Added copy button to code using jQuery and clipboard.js.
-- TODO.md added
+- Removed unneeded functions in stablogen.util
 

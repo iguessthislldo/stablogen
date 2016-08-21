@@ -1,7 +1,19 @@
+# Python Standard Library
+from collections import OrderedDict
+import itertools
+
+# 3rd Party Libraries
 import arrow, yaml
 
+# Local
 from stablogen.config import *
-from stablogen.util import make_url
+from stablogen.util import make_url, find_files
+
+# Uses OrderedDict to keep order the data in the order below
+yaml.add_representer(OrderedDict, lambda self, data:
+    self.represent_mapping('tag:yaml.org,2002:map', data.items())
+)
+post_yaml_tags = ('title', 'tags', 'created', 'when', 'last_edited')
 
 # Support Arrow Objects in PyYAML (At least date time equilvalent)
 arrow_tag='!arrow.Arrow'
@@ -13,7 +25,7 @@ yaml.add_constructor(arrow_tag, lambda loader, node:
 )
 
 # Core code
-class Post(yaml.YAMLObject):
+class Post:
     '''Core type of the program, represents a post in the blog.
     '''
     inventory = dict()
@@ -21,7 +33,7 @@ class Post(yaml.YAMLObject):
 
     def __init__(
         self, title, content, tags=[], url=None, when=None,
-        last_edited = None, created = None
+        last_edited = None, created = None, extension = None
     ):
         self.title = title
         self.url = make_url(title, url)
@@ -30,6 +42,7 @@ class Post(yaml.YAMLObject):
         self.when = when
         self.last_edited = last_edited
         self.created = created
+        self.extension = extension
 
     def create(self):
         self.created = arrow.utcnow()
@@ -54,63 +67,47 @@ class Post(yaml.YAMLObject):
     def __repr__(self):
         return '<' + self.__class__.__name__ + ': ' + str(self) + '>'
 
-    # YAML type
-    yaml_tag = '!blog.Post'
-
     @staticmethod
-    def load(post_dir):
-        if not post_dir.is_dir():
-            return None
-        post_file = post_dir / post_filename
+    def load(post_file):
         if not post_file.is_file():
-            print(str(posts_dir) + ' doesn\'t have a "' + post_filename + '"')
             return None
-        content_file = post_dir / content_filename
-        if not content_file.is_file():
-            print(str(posts_dir) + ' doesn\'t have a "' + content_filename + '"')
-            return None
-
-        # Get Post Meta data
-        with post_file.open('r') as f:
-            post = yaml.load(f)
-
-        # Get Post Content
-        with content_file.open('r') as f:
-            post.content = f.read()
-
-        if post.url != post_dir.name:
-            print('WARNING: "' + post.url + '" does not match its directory name!')
-
-        post.apply_tags()
-
-        return post
+        
+        lines = iter(post_file.read_text().split('\n'))
+        m = yaml.load('\n'.join(itertools.takewhile(str.strip, lines)))
+        return Post(
+            title = m['title'],
+            tags = m['tags'],
+            content = '\n'.join(lines),
+            created = m['created'],
+            when = m['when'],
+            last_edited = m['last_edited'],
+            extension = post_file.suffix,
+        )
 
     @classmethod
     def load_all(cls, input_dir):
         if not cls.loaded:
-            for post_dir in (input_dir/posts_dirname).glob('*'):
-                post = cls.load(post_dir)
+            for post_file in find_files(
+                input_dir/posts_dirname,
+                exts = post_file_exts
+            ):
+                post = cls.load(post_file)
                 if post is None:
                     continue
+                post.apply_tags()
                 Post.inventory[post.url] = post
             cls.loaded = True
 
-    def save(self, post_dir):
-        if not post_dir.is_dir():
-            post_dir.mkdir(parents=True, exist_ok=True)
+    def save(self, posts_dir):
+        if not posts_dir.is_dir():
+            posts_dir.mkdir(parents=True, exist_ok=True)
 
-        # Save Post Content
-        content_file = post_dir / content_filename
-        with content_file.open('w') as f:
-            f.write(self.content)
-
-        # Save Post Meta data
-        content = self.content # Don't include content
-        self.content = None
-        post_file = post_dir / post_filename
-        with post_file.open('w') as f:
-            yaml.dump(self, f)
-        self.content = content # Restore content
+        ordered = OrderedDict()
+        for tag in post_yaml_tags:
+            ordered[tag] = getattr(self, tag)
+        posts_dir.joinpath(self.url + self.extension).write_text(
+            yaml.dump(ordered) + '\n' + self.content
+        )
 
     @classmethod
     def get_finalized(cls, input_dir, final=True):
@@ -126,7 +123,9 @@ class Post(yaml.YAMLObject):
 
     def date(self, fmt = 'YYYY-MM-DD'):
         when = "" if self.when is None else self.when.format(fmt)
-        last_edited = "" if self.last_edited is None else " edited: " + self.when.format(fmt)
+        last_edited = "" if self.last_edited is None else (
+            " edited: " + self.when.format(fmt)
+        )
         return when + last_edited
 
 class Tag:
@@ -149,3 +148,4 @@ class Tag:
             key = lambda t: len(t.posts),
             reverse = True
         )
+

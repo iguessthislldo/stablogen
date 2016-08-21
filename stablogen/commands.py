@@ -5,33 +5,45 @@ import sys
 from stablogen.generate import generate
 from stablogen.config import *
 from stablogen.Post import *
+from stablogen.util import find_files
 
 def new(input_dir, title):
     '''Creates a empty post with a title supplied
     '''
     url = make_url(title)
-    post_dir = input_dir.joinpath(posts_dirname, url)
-    if post_dir.is_dir():
-        sys.exit("{} is already a post".format(url))
-    p = Post(title, "", url=url)
+    posts_dir = input_dir / posts_dirname
+    preexisting = find_files(posts_dir, url, post_file_exts, False)
+    if preexisting:
+        sys.exit('Result URL Slug: "{}" is already taken by:\n{}'.format(
+            url, '\n'.join(map(lambda i: '"{}"'.format(i), preexisting))
+        ))
+    p = Post(title, "", url=url, extension = post_file_exts[0])
     p.create()
-    p.save(post_dir)
+    p.save(posts_dir)
+
+# Not a command, helper for finalized and edited
+def check_for_multiple(posts_dir, url):
+    files = find_files(posts_dir, url, post_file_exts, False)
+    n = len(files)
+    if n > 1:
+        sys.exit('There are multiple posts starting with "{}":\n{}'.format(
+            url, '\n'.join(map(lambda i: '"{}"'.format(i), files))
+        ))
+    elif n == 0:
+        sys.exit("No post url slug starting with that name")
+    return Post.load(files[0])
 
 def finalized(input_dir, url):
-    post_dir = input_dir.joinpath(posts_dirname, url)
-    if not post_dir.is_dir():
-        sys.exit("Not a valid post")
-    p = Post.load(post_dir)
+    posts_dir = input_dir / posts_dirname
+    p = check_for_multiple(posts_dir, url)
     p.finalize()
-    p.save(post_dir)
+    p.save(posts_dir)
 
 def edited(input_dir, url):
-    post_dir = input_dir.joinpath(posts_dirname, url)
-    if not post_dir.is_dir():
-        sys.exit("Not a valid post")
-    p = Post.load(post_dir)
+    posts_dir = input_dir / posts_dirname
+    p = check_for_multiple(posts_dir, url)
     p.edit()
-    p.save(post_dir)
+    p.save(posts_dir)
 
 def list_tags(input_dir):
     '''Sort them by decreasing number of posts they have, then secondarily
@@ -45,6 +57,10 @@ def list_tags(input_dir):
 
 def list_posts(input_dir):
     Post.load_all(input_dir)
-    for post in sorted(Post.inventory.values(), key=lambda p: p.title):
+    for post in sorted(
+        Post.inventory.values(),
+        key=lambda p: p.created,
+        reverse = True
+    ):
         print(post)
 

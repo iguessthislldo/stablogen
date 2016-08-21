@@ -41,6 +41,11 @@ if __name__ == '__main__':
     else:
         input_dir = Path(args.input)
 
+    if not input_dir.is_dir():
+        sys.exit(
+            'Input Directory: "{}" does not exist!'.format(str(input_dir))
+        )
+
     if args.generate is not None:
         if args.generate[0] is None:
             output_dir = Path('.') / default_output_dirname
