@@ -75,10 +75,10 @@ div.codebox {
     max-width: 90%;
     overflow: auto;
     background-color: #282828;
+    color: #08f808;
     box-shadow: 2px 2px 15px #999;
     border-radius: 5px;
     font-family: 'monofur_for_powerline_correRg', 'monospace';
-    color: #08f808;
     margin-left: 5%;
     padding: 10px;
 }
@@ -92,6 +92,9 @@ div.codebox hr {
 button.code-copy-btn {
     border: none;
     float: right;
+    border-radius: 2px;
+    background-color: #08f808;
+    color: #282828;
 }
 
 code.inline {
