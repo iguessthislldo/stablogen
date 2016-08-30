@@ -1,1 +1,1 @@
-Changed style of copy button in code box.
+Removed Django paragraph in about page.
