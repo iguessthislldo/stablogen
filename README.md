@@ -80,11 +80,11 @@ last_edited: null
 ```
 
 I googled my first choice for a project name, it turned out someone else had
-thought of it: [alexes/blogen](https://github.com/alexex/blogen). I decided to
+thought of it: [alexex/blogen](https://github.com/alexex/blogen). I decided to
 change the name to "stablogen" but I ~~stole~~ borrowed their format for
 posts. I had them in two seperate files which was easier to program but not
 as elegant. The only differecne real difference is that I'm using just HTML
-and alexes is using Markdown for post content, which I might make possible
+and alexex is using Markdown for post content, which I might make possible
 someday as an option.
 
 The format is the post meta information in [YAML](http://yaml.org), followed
