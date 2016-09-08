@@ -14,7 +14,7 @@ last_edited: null
 <li>By default, anything else redirects to the main site...</li>
 <li>Except for other virtual hosts</li>
 </ul>
-<p>This might seem simple if you a little bit about virtual hosts, which I thought I did before setting this site up. However, the problem I had today was that I kept either getting forbidden responses or redirected to another other virtual host (Not the one I wanted). Below is the gist of my working {#icode "path"#}000-default.conf{#endicode#} as of writing:</p>
+<p>This might seem simple if you a little bit about virtual hosts, which I thought I did before setting this site up. However, the problem I had today was that I kept either getting forbidden responses or redirected to another other virtual host (Not the one I wanted). Below is the gist of my working {%icode %}000-default.conf{%endicode%} as of writing:</p>
 
 {% code "apache", "000-default.conf" -%}
 # Replace "domain.tld" with your root domain, "subdomain" with the subdomain
@@ -59,7 +59,7 @@ last_edited: null
 </IfModule>
 {%- endcode %}
 
-<p>I was having problems at first because I wasn't even using  {#icode "path"#}000-default.conf{#endicode#} as a name, just the domain name. If apache is configured to use {#icode "path"#}sites-available{#endicode#}  and {#icode "path"#}sites-enabled{#endicode#} it loads them alphabetically (I guess?). Any way the first virtual host on the first config file loaded is the "default" one.</p>
+<p>I was having problems at first because I wasn't even using  {%icode%}000-default.conf{%endicode%} as a name, just the domain name. If apache is configured to use {%icode%}sites-available{%endicode%}  and {%icode%}sites-enabled{%endicode%} it loads them alphabetically (I guess?). Any way the first virtual host on the first config file loaded is the "default" one.</p>
 
-<p>I was still having problems though, and even though I left directives like {#icode "apache"#}<DocumentRoot "/var/www/...">{#endicode#} and {#icode "apache"#}<ServerAlias domain.tld>{#endicode#} in there what finally fixed redirecting from the root domain to the subdomain was changing {#icode "apache"#}<VirtualHost *:*>{#endicode#} to {#icode "apache"#}<VirtualHost *:80>{#endicode#}. This was thorwing me off because the line is
-<a href="https://httpd.apache.org/docs/current/vhosts/examples.html#proxy">on the Apache website</a> but does't produce the result I thought it would: catching everything that was not port 443 or the other virtual hosts. This is made clear if you run {#icode "bash"#}# apachectl -S{#endicode#}, which prints the current configuration, and is great for debugging the virtual hosts because it lists them in order of precedence.</p>
+<p>I was still having problems though, and even though I left directives like {%icode "apache"%}<DocumentRoot "/var/www/...">{%endicode%} and {%icode "apache"%}<ServerAlias domain.tld>{%endicode%} in there what finally fixed redirecting from the root domain to the subdomain was changing {%icode "apache"%}<VirtualHost *:*>{%endicode%} to {%icode "apache"%}<VirtualHost *:80>{%endicode%}. This was thorwing me off because the line is
+<a href="https://httpd.apache.org/docs/current/vhosts/examples.html#proxy">on the Apache website</a> but does't produce the result I thought it would: catching everything that was not port 443 or the other virtual hosts. This is made clear if you run {%icode "sh"%}apachectl -S{%endicode%}, which prints the current configuration, and is great for debugging the virtual hosts because it lists them in order of precedence.</p>

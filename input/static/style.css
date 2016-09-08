@@ -71,14 +71,17 @@ img {
     font-style: normal;
 }
 
+.codebox {
+    font-family: 'monofur_for_powerline_correRg', 'monospace';
+    background-color: #282828;
+    color: #08f808;
+}
+
 div.codebox {
     max-width: 90%;
     overflow: auto;
-    background-color: #282828;
-    color: #08f808;
     box-shadow: 2px 2px 15px #999;
     border-radius: 5px;
-    font-family: 'monofur_for_powerline_correRg', 'monospace';
     margin-left: 5%;
     padding: 10px;
 }
@@ -97,11 +100,12 @@ button.code-copy-btn {
     color: #282828;
 }
 
-code.inline {
+span.codebox {
+    display: inline;
     white-space: nowrap;
-    background-color: #282828;
     box-shadow: 1px 1px 10px #999;
-    padding: 5px;
+    padding: 3px;
+    margin: 0px;
     border-radius: 5px;
 }
 
