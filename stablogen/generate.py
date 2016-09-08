@@ -32,7 +32,7 @@ def setup_jinja(input_dir):
 
     latest_posts = Post.get_finalized(input_dir)
     env.globals.update(dict(
-        HOSTNAME = 'fred.hornsey.us',
+        HOSTNAME = 'http://fred.hornsey.us',
         DISQUS_NAME = 'iguessthislldo',
         latest_posts = latest_posts,
         latest_post = latest_posts[0] if len(latest_posts) > 0 else None,

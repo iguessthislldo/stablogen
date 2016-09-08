@@ -2,7 +2,8 @@
 <div id="disqus_thread"></div>
 <script>
     var disqus_config = function () {
-        this.page.url = "{{HOSTNAME}}/posts/{{ post.url }}";
+        this.page.url = "{{HOSTNAME}}/posts/{{ post.url }}/";
+        this.page.identifier = "{{post.url}}";
     };
     (function() {
         var d = document, s = d.createElement('script');
@@ -17,5 +18,5 @@
 {%- endmacro %}
 
 {% macro include_comments_link(post) -%}
-{{HOSTNAME}}/posts/{{ post.url }}/#disqus_thread
+<a href="{{HOSTNAME}}/posts/{{ post.url }}/#disqus_thread" data-disqus-identifier="{{post.url}}"></a>
 {%- endmacro %}

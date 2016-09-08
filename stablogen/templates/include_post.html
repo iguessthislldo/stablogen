@@ -4,7 +4,7 @@
 <a href="/posts/{{ post.url }}" rel="bookmark"><i class="fa fa-link" aria-hidden="true"></i></a>
 <br>
 <i class="fa fa-comments" aria-hidden="true"></i>
-<a href="{{ include_comments_link(post) }}"></a>
+{{ include_comments_link(post) }}
 <i class="fa fa-clock-o" aria-hidden="true"></i>
 <i>{{ post.date() }}</i>
 <i class="fa fa-tags" aria-hidden="true"></i>
@@ -19,3 +19,4 @@
 {{ post.content -}}
 {% endautoescape %}
 {%- endmacro %}
+
