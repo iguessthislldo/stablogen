@@ -3,9 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="author" content="Frederick Hornsey">
-<meta name="description" content="Blog about my experience with programming">
+<meta name="description" content="My attempts at trying to master one of the most complicated tools humanity has ever created.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}{% endblock %}</title>
+<!-- Favicon -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="theme-color" content="#ffffff">
+<!-- CSS and JS-->
 <link rel="stylesheet" type="text/css" href="/static/style.css" />
 <link rel="stylesheet" type="text/css" href="/static/code.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.12/clipboard.min.js"></script>
@@ -21,7 +29,10 @@
 {% block content %}
 {% endblock %}
 <hr>
-<footer>&copy; Copyright 2016 Frederick Hornsey &lt;<a href="mailto:fred@hornsey.us">fred@hornsey.us</a>&gt;</footer>
+<footer>
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>
+Frederick Hornsey &lt;<a href="mailto:fred@hornsey.us">fred@hornsey.us</a>&gt;
+</footer>
 <script>
 new Clipboard('.code-copy-btn', {
     text: function(trigger) {
