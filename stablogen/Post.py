@@ -118,7 +118,8 @@ class Post:
             is_final = lambda p: p.when is None
         return sorted(
             filter(is_final, cls.inventory.values()),
-            key=lambda p: p.when
+            key=lambda p: p.when,
+            reverse=True
         )
 
     def date(self, fmt = 'YYYY-MM-DD'):
