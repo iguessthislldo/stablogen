@@ -1,8 +1,10 @@
+# General TODO
+- Seperate Personal Blog from this repo.
+- Make input file configuration (inputdir/stablogen.yaml) actually useful.
+- Create generic templetes.
+
 # Code Tag TODO
 - Need to get color to be configured externally
-- Inline code 
-- Guessing code when no language is specified
 - Handle no filename being specified
-- See what languages are supported
 - Download Option on full code snippets?
 
