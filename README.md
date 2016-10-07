@@ -7,14 +7,16 @@ static blog generator, I **strongly** suggest you use one of the many others
 that are eaiser to use, more powerful and/or have objectively better design
 (e.g. As of writting [Jekyll](https://jekyllrb.com) or
 [Pelican](http://blog.getpelican.com/) look good for just about anyone),
-however I wrote this one ~~and use it for
-[my personal blog](https://fred.hornsey.us)~~ (Not yet, but soon). As such it
-contains the content and settings for my blog.
-
+however I wrote this one and use it for
+[my personal blog](https://fred.hornsey.us). As such it
+contains the content and settings for my blog, although I plan on seperating
+my personal stuff from the repo and make it have more generic and general
+configurations.
 
 ## Dependencies
 To install the required dependencies, please run:
-`pip install Jinja2 arrow PyYAML Pygments`
+`pip install Jinja2 arrow PyYAML Pygments`. This is of course should be done
+in a virtualenv.
 
 ## Usage
 To generate a site: `./stablogen.py -g [OUTPUT] [INPUT]`
