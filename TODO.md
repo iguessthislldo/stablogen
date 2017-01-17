@@ -1,5 +1,6 @@
 # General TODO
 - Make input file configuration (inputdir/stablogen.yaml) actually useful.
+- Remove personal specifics from the code.
 - Create generic templetes.
 
 # Code Tag TODO

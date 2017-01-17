@@ -12,8 +12,9 @@ good for just about anyone), however I wrote this one for fun and use it for
 ## Installation
 Once downloaded, use `sudo pip install .` in the project directory if you
 want to install it to your whole system. To install it to your home directory:
-`pip install --user .` Finally if your using a virtualenv to isolate the
-program, just `pip install .`
+`pip install --user .` Finally if you're using a
+[virtualenv](https://virtualenv.pypa.io/en/stable/)
+to isolate the program, just `pip install .`
 
 `pip` will install the dependencies and the `stablogen` command automatically.
 
