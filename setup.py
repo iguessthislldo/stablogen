@@ -16,5 +16,6 @@ setup(
     ],
     packages=['stablogen'],
     scripts=['bin/stablogen'],
+    include_package_data=True,
     zip_safe=False
 )
