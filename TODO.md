@@ -1,5 +1,4 @@
 # General TODO
-- Seperate Personal Blog from this repo.
 - Make input file configuration (inputdir/stablogen.yaml) actually useful.
 - Create generic templetes.
 

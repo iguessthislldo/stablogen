@@ -8,10 +8,7 @@ that are eaiser to use, more powerful and/or have objectively better design
 (e.g. As of writting [Jekyll](https://jekyllrb.com) or
 [Pelican](http://blog.getpelican.com/) look good for just about anyone),
 however I wrote this one and use it for
-[my personal blog](https://fred.hornsey.us). As such it
-contains the content and settings for my blog, although I plan on seperating
-my personal stuff from the repo and make it have more generic and general
-configurations.
+[my personal blog](https://fred.hornsey.us).
 
 ## Dependencies
 To install the required dependencies, please run:
