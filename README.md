@@ -1,7 +1,7 @@
 # stablogen
 
 **stablogen** is yet another static
-blog generator. It's built aroung [Jinja](http://jinja.pocoo.org/). If you
+blog generator. It's built around [Jinja](http://jinja.pocoo.org/). If you
 want to make a real blog with a static blog generator, I **strongly**
 suggest you use one of the many others that are easier to use, more
 powerful and/or have objectively better design (e.g. As of writing
