@@ -56,14 +56,19 @@ Ex: `stablogen.py -n 'This is an Example Post'` -> `input/posts/this_is_an_examp
 
 Ex: `stablogen.py -n 'This is Another Post' other_site` -> `other_site/posts/this_is_an_example_post.html`
 
-Posts have three internal timestamps, when the post was created (with the -n
-option), then right before you intent to post it you can "finalize" it
-by using the -f argument. Finally you can mark the post as being edited
-by using the -e argument. All these do it set the time and date shown in the
-posts and what order they are displayed. The required URL for the -f and -e
-arguments is the URL slug of the post you want to change. Also the program will
-accept the beginning of the slug as long as it matches the beginning of a single
-post, else it will list the posts it matches so you can correct the command.
+Posts have three internal timestamps:
+ - When the post was created with the -n option. This is doesn't affect the
+ final blog, just how the posts are listed by the command.
+ - Right before you intent to post it you can "finalize" it by using the -f
+ argument. This marks the posts to be included in the blog, is listed as
+ the post date, and is how posts are ordered in the listings on the blog.
+ - Finally you can mark the post as being edited by using the -e argument. 
+ This is just shown on posts for informational purposes.
+
+The required URL for the -f and -e arguments is the URL slug of the post you
+want to change. Also the program will accept the beginning of the slug as long
+as it matches the beginning of a single post, else it will list the posts it
+matches so you can correct the command.
 
 Ex:
 ```sh
@@ -102,8 +107,9 @@ someday as an option.
 The format is the post meta information in [YAML](http://yaml.org), followed
 by **a blank line**, then the HTML of the post content. The YAML can be read
 in any order, but I am forcing it to be output in the order above every time
-for readability. When changing it, it would be good to know at least the
-basics of [YAML](https://learnxinyminutes.com/docs/yaml). You can put what
-ever you want in the beginning as long as it's valid YAML, there's no blank
-line before before the content begins, and all the required tags are there.
+for readability. If you were to change it manually, it would be good to know
+at least the basics of [YAML](https://learnxinyminutes.com/docs/yaml). You
+can put what ever you want in the beginning as long as it's valid YAML,
+there's no blank line before before the content begins, and all the required
+tags are there.
 
